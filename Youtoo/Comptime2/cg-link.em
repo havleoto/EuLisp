@@ -344,7 +344,12 @@
     loc))
 
 (defmethod convert-constant ((value <character>))
-  (make-symbol (fmt "c_char_as_eul_char('~a')" value)))
+  (make-symbol
+    ;; Generate valid C character literals. In doubt, use numeric value.
+    (let ((numeric-value (convert value <fpi>)))
+      (if (and (<= 32 numeric-value 126) (not (member value "'\\")))
+        (fmt "c_char_as_eul_char('~a')" value)
+        (fmt "c_char_as_eul_char(~d)" numeric-value)))))
 
 (defmethod convert-constant ((value <vector>))
   (let ((loc (gensym "vec_"))
